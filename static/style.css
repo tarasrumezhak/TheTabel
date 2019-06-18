@@ -1,0 +1,22 @@
+body {
+  background-color: #efefef;
+  font-family: Arial;
+  height: 100%;
+}
+
+header{
+  background-color: #48d1cc !important;
+  height: 110px;
+  width: 100%;
+}
+
+header img{
+  height: 90px;
+  width: auto;
+  display: inline-block;
+}
+
+footer {
+  background-color: #48d1cc !important;
+  height: 200px;
+}
