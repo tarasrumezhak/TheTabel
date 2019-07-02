@@ -100,9 +100,6 @@ def get_word_columns(bboxes):
     return words_columns
 
 
-
-
-
 def replace_letters(word):
     correction = {"a": "а", "B":"в", "M": "м", "y": "у", "k": "к",
                   "0": "о", "o": "о","x": "х", "j": "і", "i": "і",
@@ -148,7 +145,6 @@ def build_grades_dct(filename):
     return grades
 
 
-
 def optimize_grades(lst, dct):
     new_lst = lst[0]
     for i in range(len(new_lst)-1):
@@ -165,18 +161,10 @@ def optimize_grades(lst, dct):
     return new_lst
 
 
-
-
-
-
-
-
 print(time.time() - start_time)
 
 
-
 def atestat_analysis(file_path):
-
 	subscription_key = "f308070b83b54f8b99c5ae0697f708a0"
 	image_data = open(file_path, "rb").read()
 
@@ -244,6 +232,7 @@ def create_csv(lst):
 
 
 def main():
+
     folder_path = './upload'
     extensions = {'jpg', 'jpeg', 'png'}
     files = list(filter(lambda x: x.split('.')[-1] in extensions,[join(folder_path, f) for f in listdir(folder_path)]))
@@ -253,6 +242,7 @@ def main():
     for file_path in files:
         print(file_path)
         lst.append([(file_path.split('/')[-1]).split('.')[0], round(atestat_analysis(file_path), 2)])
+
     # create exel file with data
     # create_csv(lst)
 if __name__ == "__main__":
