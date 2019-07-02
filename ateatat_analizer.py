@@ -193,6 +193,6 @@ if __name__ == "__main__":
     root.withdraw()
 
     file_path = filedialog.askopenfilename(title="Select the photo of Atestat")
-    atestat = Atestat("./path")
+    atestat = Atestat(file_path)
     print(atestat.grades)
 
