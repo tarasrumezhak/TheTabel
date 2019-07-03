@@ -6,6 +6,7 @@ import requests
 import json
 from sklearn.cluster import KMeans
 import numpy as np
+import pyexcel
 
 
 class Atestat:
@@ -188,11 +189,20 @@ class Atestat:
         return self.__grades_dict
 
 
-if __name__ == "__main__":
+def main():
     root = tk.Tk()
     root.withdraw()
 
     file_path = filedialog.askopenfilename(title="Select the photo of Atestat")
     atestat = Atestat(file_path)
     print(atestat.grades)
+
+    grades = atestat.grades
+    grades = [[atestat.grades['mean_grade']] + [grade for grade in atestat.grades['subjects_grades'].values()]]
+    print(grades)
+    pyexcel.save_as(array=grades, dest_file_name="result1.xlsx", encoding="utf-8")
+
+if __name__ == "__main__":
+    main()
+
 

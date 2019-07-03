@@ -42,7 +42,8 @@
     <!-- Change action value to your upload address -->
     <form action="{{ url_for('upload_file') }}" class="dropzone" method="POST" enctype="multipart/form-data">
     </form>
-    <a href="/return_result" target='blank'><button class="btn btn-light d-block mx-auto">Submit all files and download data</button></a>
+    <form action="{{ url_for('return_result') }}"><a target='blank'><button class="btn btn-light d-block mx-auto">Submit all files and download data</button></a>
+    </form>
     <!-- Footer -->
   <footer class="page-footer font-small pt-4">
       <!-- Footer Links -->
