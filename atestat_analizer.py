@@ -177,8 +177,8 @@ class Atestat:
             dpa_grade[subjects[i].strip()] = grades[i]
         atestat_info = {}
         atestat_info['mean_grade'] = mean_grade
-        atestat_info['subjects_grades'] = subj_grade
-        atestat_info['dpa_grades'] = dpa_grade
+        atestat_info['subjects_grades'] = grades
+        # atestat_info['dpa_grades'] = dpa_grade
 
         return atestat_info
 

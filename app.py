@@ -41,9 +41,8 @@ def return_result():
         print(path)
         # atestat = atestat_analizer.Atestat(os.path.join(app.config['UPLOADED_PATH'], path))
         atestat = atestat_analizer.Atestat(os.path.join(session['tempdir'], path))
-        grades.append([atestat.grades['mean_grade']] + [grade for grade in atestat.grades['subjects_grades'].values()])
-    shutil.rmtree(session['tempdir'])
-    del session['tempdir']
+        grades.append([atestat.grades['mean_grade']] + [grade for grade in atestat.grades['subjects_grades']])
+    # shutil.rmtree(session['tempdir'])
     pyexcel.save_as(array=grades, dest_file_name=os.path.join(app.root_path, 'result.xlsx'), encoding="utf-8")
 
 
