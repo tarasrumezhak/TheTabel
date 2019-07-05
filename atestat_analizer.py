@@ -47,8 +47,8 @@ class Atestat:
                 new_filtered_ys.append(new_ys[ind])
                 filtered_boxes_of_words.append(boxes_of_words[ind])
 
-        X = np.array(new_filtered_xs)
-        kmeans = KMeans(n_clusters=4, random_state=0).fit(X)
+
+        kmeans = KMeans(n_clusters=4, random_state=0).fit(X.reshape(-1, 1))
 
         new_boxes_labels = kmeans.labels_
         new_columns_coordinates = [el[0] for el in kmeans.cluster_centers_]
