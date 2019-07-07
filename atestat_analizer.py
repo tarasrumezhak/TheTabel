@@ -177,6 +177,8 @@ class Atestat:
             dpa_grade[subjects[i].strip()] = grades[i]
         atestat_info = {}
         atestat_info['mean_grade'] = mean_grade
+        print("GRRRRRRRR: " + str(grades))
+        grades = [grade for grade in grades if isinstance(grade, int)]
         atestat_info['subjects_grades'] = grades
         # atestat_info['dpa_grades'] = dpa_grade
 
@@ -201,6 +203,7 @@ def main():
     grades = [[atestat.grades['mean_grade']] + [grade for grade in atestat.grades['subjects_grades'].values()]]
     print(grades)
     pyexcel.save_as(array=grades, dest_file_name="result1.xlsx", encoding="utf-8")
+
 
 if __name__ == "__main__":
     main()

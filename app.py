@@ -16,12 +16,9 @@ app.secret_key = 'randomkey'
 
 app.config['UPLOADED_PATH'] = os.path.join(app.root_path, 'upload')
 
+# The idea is these headers should avoid caching (Not sure if it works). SRC - stackoverflow
 @app.after_request
 def add_header(r):
-    """
-    Add headers to both force latest IE rendering engine or Chrome Frame,
-    and also to cache the rendered page for 10 minutes.
-    """
     r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     r.headers["Pragma"] = "no-cache"
     r.headers["Expires"] = "0"
@@ -30,38 +27,28 @@ def add_header(r):
 
 @app.route('/return_result')
 def return_result():
-    # tabel_analysis.main()
-
-    # for path in app.config['UPLOADED_PATH']:
     grades = []
-    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    # for path in os.listdir(app.config['UPLOADED_PATH']):
     for path in os.listdir(session['tempdir']):
         print(path)
         # atestat = atestat_analizer.Atestat(os.path.join(app.config['UPLOADED_PATH'], path))
         atestat = atestat_analizer.Atestat(os.path.join(session['tempdir'], path))
         grades.append([atestat.grades['mean_grade']] + [grade for grade in atestat.grades['subjects_grades']])
-    # DELETE FILES FROM CREATED DIRECTORY ?
+    # DELETE FILES FROM CREATED DIRECTORY
     # shutil.rmtree(session['tempdir'])
-    """
-    if 'tempdir' in session:
-        for the_file in os.listdir(session['tempdir']):
-            file_path = os.path.join(session['tempdir'], the_file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-            except Exception as e:
-                print(e)
-    """
-    pyexcel.save_as(array=grades, dest_file_name=os.path.join(app.root_path, 'result.xlsx'), encoding="utf-8")
 
-    return add_header(send_file(os.path.join(app.root_path, 'result.xlsx'), attachment_filename='result.xlsx'))
+
+
+
+    # temporary directory for the result
+
+    temp_res_dir = tempfile.mkdtemp()
+    session['temp_result_dir'] = temp_res_dir
+
+    temp_res_dir = session['temp_result_dir']
+    pyexcel.save_as(array=grades, dest_file_name=os.path.join(temp_res_dir, 'result.xlsx'), encoding="utf-8")
+
+    return add_header(send_file(os.path.join(temp_res_dir, 'result.xlsx'), attachment_filename='result.xlsx'))
     # send_from_directory("result1.xlsx", as_attachment=True)
-
-# @app.route('/return_result/', methods=['GET', 'POST'])
-# def return_result(filename='results.csv'):
-#     uploads = os.path.join(current_app.root_path, app.config['UPLOAD_FOLDER'])
-#     return send_from_directory(directory=static, filename=filename)
 
 
 @app.route('/index', methods=['GET', 'POST'])
@@ -70,18 +57,18 @@ def upload_file():
         format = "%Y-%m-%dT%H:%M:%S"
         now = datetime.datetime.utcnow().strftime(format)
 
-        if 'tempdir' not in session:
+        if 'tempdir' not in session.keys():
             tempdir = tempfile.mkdtemp()
-            print("00000000000000000000000000000000000")
             session['tempdir'] = tempdir
 
+
+        # session['tempdir'] = tempfile.mkdtemp()
         tempdir = session['tempdir']
 
         for f in request.files.getlist('file'):
             filename = secure_filename(session['username'] + now + f.filename)
             filepath = os.path.join(tempdir, filename)
             print(filepath + "EEEEEEEEEEE")
-            # f.save(os.path.join(app.config['UPLOADED_PATH'], f.filename))
             f.save(filepath)
     return render_template('index.html')
 
@@ -93,7 +80,19 @@ def login():
             username = session['username']
             print(username)
         session['username'] = request.form['username']
+
+        if 'tempdir' in session:
+            for the_file in os.listdir(session['tempdir']):
+                file_path = os.path.join(session['tempdir'], the_file)
+                print("DELDELDELDELDELDDLE")
+                try:
+                    if os.path.isfile(file_path):
+                        os.unlink(file_path)
+                except Exception as e:
+                    print(e)
+
         return render_template('index.html')
+
     return render_template('login.html')
 
 
