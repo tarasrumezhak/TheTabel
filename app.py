@@ -3,7 +3,6 @@
 """
 import datetime
 import os
-import tabel_analysis
 import atestat_analizer
 import pyexcel
 import tempfile
@@ -42,18 +41,19 @@ def return_result():
         # atestat = atestat_analizer.Atestat(os.path.join(app.config['UPLOADED_PATH'], path))
         atestat = atestat_analizer.Atestat(os.path.join(session['tempdir'], path))
         grades.append([atestat.grades['mean_grade']] + [grade for grade in atestat.grades['subjects_grades']])
+    # DELETE FILES FROM CREATED DIRECTORY ?
     # shutil.rmtree(session['tempdir'])
+    """
+    if 'tempdir' in session:
+        for the_file in os.listdir(session['tempdir']):
+            file_path = os.path.join(session['tempdir'], the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print(e)
+    """
     pyexcel.save_as(array=grades, dest_file_name=os.path.join(app.root_path, 'result.xlsx'), encoding="utf-8")
-
-
-
-    # time.sleep(5)
-
-    # return Response(
-    #     csv,
-    #     mimetype="text/csv",
-    #     headers={"Content-disposition":
-    #              "attachment; filename=results.csv"})
 
     return add_header(send_file(os.path.join(app.root_path, 'result.xlsx'), attachment_filename='result.xlsx'))
     # send_from_directory("result1.xlsx", as_attachment=True)
