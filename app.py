@@ -6,6 +6,7 @@ import os
 import atestat_analizer
 import pyexcel
 import tempfile
+import format_functions
 import shutil
 
 from flask import Flask, render_template, request, send_file, send_from_directory, session, redirect, url_for, escape
@@ -29,17 +30,11 @@ def add_header(r):
 def return_result():
     grades = []
     for path in os.listdir(session['tempdir']):
-        print(path)
-        # atestat = atestat_analizer.Atestat(os.path.join(app.config['UPLOADED_PATH'], path))
+
         atestat = atestat_analizer.Atestat(os.path.join(session['tempdir'], path))
-        grades.append([atestat.grades['mean_grade']] + [grade for grade in atestat.grades['subjects_grades']])
+        name = format_functions.name_from_secure_name(path)
+        grades.append([name] + [atestat.grades['mean_grade']] + [grade for grade in atestat.grades['subjects_grades']])
     # DELETE FILES FROM CREATED DIRECTORY
-    # shutil.rmtree(session['tempdir'])
-
-
-
-
-    # temporary directory for the result
 
     temp_res_dir = tempfile.mkdtemp()
     session['temp_result_dir'] = temp_res_dir
@@ -48,7 +43,7 @@ def return_result():
     pyexcel.save_as(array=grades, dest_file_name=os.path.join(temp_res_dir, 'result.xlsx'), encoding="utf-8")
 
     return add_header(send_file(os.path.join(temp_res_dir, 'result.xlsx'), attachment_filename='result.xlsx'))
-    # send_from_directory("result1.xlsx", as_attachment=True)
+
 
 
 @app.route('/index', methods=['GET', 'POST'])
@@ -62,7 +57,6 @@ def upload_file():
             session['tempdir'] = tempdir
 
 
-        # session['tempdir'] = tempfile.mkdtemp()
         tempdir = session['tempdir']
 
         for f in request.files.getlist('file'):

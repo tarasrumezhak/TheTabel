@@ -177,7 +177,6 @@ class Atestat:
             dpa_grade[subjects[i].strip()] = grades[i]
         atestat_info = {}
         atestat_info['mean_grade'] = mean_grade
-        print("GRRRRRRRR: " + str(grades))
         grades = [grade for grade in grades if isinstance(grade, int)]
         atestat_info['subjects_grades'] = grades
         # atestat_info['dpa_grades'] = dpa_grade
