@@ -3,11 +3,15 @@
 """
 import datetime
 import os
-import atestat_analizer
+
+# UNCOMMENT LINE 8 AND COMMENT LINE 9 TO USE MICROSOFT VISION API
+# import atestat_analizer_microsoft as atestat_analizer
+import atestat_analizer_ourmodel as atestat_analizer
+
 import pyexcel
 import tempfile
 import format_functions
-import shutil
+import time
 
 from flask import Flask, render_template, request, send_file, send_from_directory, session, redirect, url_for, escape
 from werkzeug.utils import secure_filename
@@ -29,11 +33,15 @@ def add_header(r):
 @app.route('/return_result')
 def return_result():
     grades = []
+    t = time.time()
     for path in os.listdir(session['tempdir']):
 
         atestat = atestat_analizer.Atestat(os.path.join(session['tempdir'], path))
         name = format_functions.name_from_secure_name(path)
-        grades.append([name] + [atestat.grades['mean_grade']] + [grade for grade in atestat.grades['subjects_grades']])
+        atestat_grades = atestat.grades
+        print(time.time() - t)
+        grades.append([name] + [atestat_grades['mean_grade']] + [grade for grade in atestat_grades['subjects_grades']])
+        time.sleep(2)
     # DELETE FILES FROM CREATED DIRECTORY
 
     temp_res_dir = tempfile.mkdtemp()
@@ -62,7 +70,6 @@ def upload_file():
         for f in request.files.getlist('file'):
             filename = secure_filename(session['username'] + now + f.filename)
             filepath = os.path.join(tempdir, filename)
-            print(filepath + "EEEEEEEEEEE")
             f.save(filepath)
     return render_template('index.html')
 
@@ -72,13 +79,13 @@ def login():
     if request.method == 'POST':
         if 'username' in session:
             username = session['username']
-            print(username)
+
         session['username'] = request.form['username']
 
         if 'tempdir' in session:
             for the_file in os.listdir(session['tempdir']):
                 file_path = os.path.join(session['tempdir'], the_file)
-                print("DELDELDELDELDELDDLE")
+
                 try:
                     if os.path.isfile(file_path):
                         os.unlink(file_path)

@@ -1,12 +1,8 @@
-import tkinter as tk
-from tkinter import filedialog
+# ATESTAT CLASS USING OUR MODEL
 import nltk
-
 import requests
-import json
 from sklearn.cluster import KMeans
 import numpy as np
-import pyexcel
 
 
 class Atestat:
@@ -22,15 +18,12 @@ class Atestat:
         '''
         takes output of get_bounding_boxes(image_data, subscription_key) as input
         '''
-        boxes = []
-        for element in bboxes['regions']:
-            for box in element['lines']:
-                boxes.append(box)
-
         boxes_of_words = []
-        for box in boxes:
-            for b in box['words']:
-                boxes_of_words.append(b)
+        for ind, coords in enumerate(bboxes['bbox']):
+            width = int(coords[2][0] - coords[0][0])
+            height = int(coords[2][1] - coords[0][1])
+            coord_str = str(int(coords[0][0])) + ',' + str(int(coords[0][1])) + ',' + str(width) + ',' + str(height)
+            boxes_of_words.append({'boundingBox': coord_str, 'text': bboxes['words'][ind]})
 
         new_ys = [[int(box['boundingBox'].split(',')[1])] for box in boxes_of_words]
         new_xs = [[int(box['boundingBox'].split(',')[0])] for box in boxes_of_words]
@@ -119,34 +112,15 @@ class Atestat:
         return new_lst
 
     @staticmethod
-    def _get_bounding_boxes(image_data, subscription_key):
-        # You must use the same region in your REST call as you used to get your
-        # subscription keys. For example, if you got your subscription keys from
-        # westus, replace "westcentralus" in the URI below with "westus".
-        #
-        # Free trial subscription keys are generated in the "westus" region.
-        # If you use a free trial subscription key, you shouldn't need to change
-        # this region.
-        vision_base_url = "https://northeurope.api.cognitive.microsoft.com/vision/v1.0/"
-
-        analyze_url = vision_base_url + "recognizeText"
-
-        # Set image_url to the URL of an image that you want to analyze.
-
-        headers = {'Ocp-Apim-Subscription-Key': subscription_key, 'Content-Type': 'application/octet-stream'}
-        params = {'handwriting': 'false', 'language': 'ru'}
-        response = requests.post(analyze_url, headers=headers, params=params, data=image_data)
-        response.raise_for_status()
-
-        # The 'analysis' object contains various fields that describe the image. The most
-        # relevant caption for the image is obtained from the 'description' property.
-
-        return json.loads(response.text)
+    def _get_bounding_boxes(image_data):
+        url = 'http://104.248.140.247:80/'
+        files = {"image": image_data}
+        r = requests.post(url, files=files)
+        return r.json()
 
     def _atestat_analysis(self):
-        subscription_key = "c7357ae6c97a40e495b37f304a8c9745"
         image_data = self.image
-        word_columns = self._get_word_columns(self._get_bounding_boxes(image_data, subscription_key))
+        word_columns = self._get_word_columns(self._get_bounding_boxes(image_data))
         grades = []
         grades_dict = self._build_grades_dct("grades_dict.txt")
         word_cols = [word_columns[1] + word_columns[3]]
@@ -179,7 +153,6 @@ class Atestat:
         atestat_info['mean_grade'] = mean_grade
         grades = [grade for grade in grades if isinstance(grade, int)]
         atestat_info['subjects_grades'] = grades
-        # atestat_info['dpa_grades'] = dpa_grade
 
         return atestat_info
 
@@ -191,17 +164,15 @@ class Atestat:
 
 
 def main():
-    root = tk.Tk()
-    root.withdraw()
 
-    file_path = filedialog.askopenfilename(title="Select the photo of Atestat")
+    file_path = r"D:\Max\Projects\TheTabel\atestats\Usachova.jpg"
     atestat = Atestat(file_path)
     print(atestat.grades)
 
-    grades = atestat.grades
-    grades = [[atestat.grades['mean_grade']] + [grade for grade in atestat.grades['subjects_grades'].values()]]
+    # grades = atestat.grades
+    grades = [[atestat.grades['mean_grade']] + [grade for grade in atestat.grades['subjects_grades']]]
     print(grades)
-    pyexcel.save_as(array=grades, dest_file_name="result1.xlsx", encoding="utf-8")
+
 
 
 if __name__ == "__main__":
