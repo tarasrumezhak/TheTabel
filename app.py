@@ -30,6 +30,7 @@ def add_header(r):
     r.headers['Cache-Control'] = 'public, max-age=0'
     return r
 
+
 @app.route('/return_result')
 def return_result():
     grades = []
@@ -53,7 +54,6 @@ def return_result():
     return add_header(send_file(os.path.join(temp_res_dir, 'result.xlsx'), attachment_filename='result.xlsx'))
 
 
-
 @app.route('/index', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -64,9 +64,7 @@ def upload_file():
             tempdir = tempfile.mkdtemp()
             session['tempdir'] = tempdir
 
-
         tempdir = session['tempdir']
-
         for f in request.files.getlist('file'):
             filename = secure_filename(session['username'] + now + f.filename)
             filepath = os.path.join(tempdir, filename)

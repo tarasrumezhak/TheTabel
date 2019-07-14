@@ -1,0 +1,39 @@
+body {
+  background-color: #efefef;
+  font-family: Arial;
+  height: 100%;
+}
+
+header{
+  background-color: #48d1cc !important;
+  height: 110px;
+  width: 100%;
+}
+
+header img{
+  height: 90px;
+  width: auto;
+  display: inline-block;
+}
+
+footer {
+  background-color: #48d1cc !important;
+  height: 200px;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+.main {
+  margin: auto;
+  margin-top: 200px;
+  width: 50%;
+  padding: 10px;
+}
+
+.main .submain {
+  margin: auto;
+  width: 100%;
+  padding: 10px;
+}
