@@ -57,17 +57,13 @@ class Atestat:
         words_columns = []
         for col_ind in sorted_columns_coordinates_indices:
             words_columns.append([filtered_boxes_of_words[ind]['text'] for ind in indices_matrix[col_ind]])
+        # print("Words columns: ", words_columns)
         return words_columns
+
 
     @staticmethod
     def _replace_letters(word):
-        correction = {"a": "а", "B": "в", "M": "м", "y": "у", "k": "к",
-                      "0": "о", "o": "о", "x": "х", "j": "і", "i": "і",
-                      "p": "р", "H": "н", "c": "с", "ф": "ф", "ђ": "і", "—": " ",
-                      "3": "з", "K": "к", "E": "Е", "ы": "ь", "_": " ", "Ы": "Б"}
-        for letter in word:
-            if letter in correction.keys():
-                word = word.replace(letter, correction[letter])
+        word.replace("дият", "дцят")
         return word.lower().strip()
 
     @staticmethod
@@ -83,8 +79,10 @@ class Atestat:
         distance = {}
         for word in subjects:
             distance[word] = nltk.edit_distance(word_with_mistake.lower(), word[:-1].lower())
+        # print("Distance", distance)
         proper_word = self._find_min(distance)
         fail_rate = distance[proper_word] / len(proper_word)
+        # print("Fail: ", proper_word[:-1], fail_rate)
         return proper_word[:-1], fail_rate
 
     @staticmethod
@@ -93,7 +91,7 @@ class Atestat:
             grades_lst = f.readlines()
         grades = {}
         for value, subject in enumerate(grades_lst):
-            grades[subject.strip().replace("\ufeff", "")] = value + 1
+            grades[subject.strip().replace("\ufeff", "")] = value + 6
         return grades
 
     def _optimize_grades(self, lst, dct):
@@ -116,39 +114,54 @@ class Atestat:
         url = 'http://104.248.140.247:80/'
         files = {"image": image_data}
         r = requests.post(url, files=files)
+        print("all words: ", r.json()["words"])
         return r.json()
 
     def _atestat_analysis(self):
         image_data = self.image
-        word_columns = self._get_word_columns(self._get_bounding_boxes(image_data))
+        # word_columns = self._get_word_columns(self._get_bounding_boxes(image_data))
+        word_columns = self._get_bounding_boxes(image_data)["words"]
         grades = []
         grades_dict = self._build_grades_dct("grades_dict.txt")
-        word_cols = [word_columns[1] + word_columns[3]]
-        word_cols = [self._optimize_grades(word_cols, grades_dict)]
-        for col in word_cols:
-            for word in col:
-                corrected = self._correct_word(self._replace_letters(word), "dictionary2.txt")
-                if corrected[0].strip() in grades_dict.keys():
-                    grades.append(corrected[0])
+        # word_cols = [word_columns[1] + word_columns[3]]
+        # # print("Word cols: ", word_cols)
+        # word_cols = [self._optimize_grades(word_cols, grades_dict)]
+        # for col in word_cols:
+        #     for word in col:
+        #         corrected = self._correct_word(self._replace_letters(word), "dictionary2.txt")
+        #         if corrected[0].strip() in grades_dict.keys():
+        #             grades.append(corrected[0])
+        counter = 0
+        for word in word_columns:
+            corrected = self._correct_word(self._replace_letters(str(word)), "dictionary2.txt")
+            # print(corrected)
+            if corrected[0].strip() in grades_dict.keys() and corrected[1] < 0.5:
+                counter += 1
+                grades.append(corrected[0])
+                print("Here ", corrected, " Word: ", str(word), " ", counter)
+            elif word.strip().endswith("ять"):
+                grades.append("Дев'ять")
+                print("2222Here ", corrected, " Word: ", str(word), " ", counter)
 
         grades = [grades_dict[x] for x in grades]
+        print(grades)
 
         mean_grade = np.mean(grades)
 
-        for col in word_cols:
-            for word in col:
-                corrected = self._correct_word(self._replace_letters(word), "dictionary2.txt")
-                if corrected[0].strip() in grades_dict.keys():
-                    grades.append(corrected[0])
+        # for col in word_cols:
+        #     for word in col:
+        #         corrected = self._correct_word(self._replace_letters(word), "dictionary2.txt")
+        #         if corrected[0].strip() in grades_dict.keys():
+        #             grades.append(corrected[0])
 
-        with open("subjects.txt", encoding="utf-8") as f:
-            subjects = f.readlines()
-        subj_grade = {}
-        for i in range(len(subjects) - 3):
-            subj_grade[subjects[i].strip()] = grades[i]
-        dpa_grade = {}
-        for i in range(len(subjects) - 3, len(subjects)):
-            dpa_grade[subjects[i].strip()] = grades[i]
+        # with open("subjects.txt", encoding="utf-8") as f:
+        #     subjects = f.readlines()
+        # subj_grade = {}
+        # for i in range(len(subjects) - 3):
+        #     subj_grade[subjects[i].strip()] = grades[i]
+        # dpa_grade = {}
+        # for i in range(len(subjects) - 3, len(subjects)):
+        #     dpa_grade[subjects[i].strip()] = grades[i]
         atestat_info = {}
         atestat_info['mean_grade'] = mean_grade
         grades = [grade for grade in grades if isinstance(grade, int)]
@@ -165,14 +178,13 @@ class Atestat:
 
 def main():
 
-    file_path = r"D:\Max\Projects\TheTabel\atestats\Usachova.jpg"
+    file_path = r"C:\Users\User\Documents\AzureServer\upload\vika.jpg"
     atestat = Atestat(file_path)
     print(atestat.grades)
 
     # grades = atestat.grades
     grades = [[atestat.grades['mean_grade']] + [grade for grade in atestat.grades['subjects_grades']]]
     print(grades)
-
 
 
 if __name__ == "__main__":
