@@ -5,7 +5,7 @@ Flask==1.0.2
 Flask-Uploads==0.2.1
 idna==2.8
 itsdangerous==1.1.0
-Jinja2==2.10
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 nltk==3.4
 numpy==1.16.2
